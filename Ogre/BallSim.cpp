@@ -37,18 +37,18 @@ BallSim::~BallSim(void)
 void BallSim::move(const Ogre::FrameEvent& evt) {    
     Ogre::Vector3 bPosition = sunNode->getPosition();
     std::cout << bPosition.y << std::endl;
+    
+    if(bPosition.y < -1500.0f + sunRadius && sunDirection.y < 0.0f) sunDirection.y = -sunDirection.y;
+    if(bPosition.y > 1500.0f - sunRadius && sunDirection.y > 0.0f) sunDirection.y = -sunDirection.y;
+    if(bPosition.z < -1500.0f + sunRadius && sunDirection.z < 0.0f) sunDirection.z = -sunDirection.z;
+    if(bPosition.z > 1500.0f - sunRadius && sunDirection.z > 0.0f) sunDirection.z = -sunDirection.z;
+    if(bPosition.x < -1500.0f + sunRadius && sunDirection.x < 0.0f) sunDirection.x = -sunDirection.x;
+    if(bPosition.x > 1500.0f - sunRadius && sunDirection.x > 0.0f) sunDirection.x = -sunDirection.x;
     /*
-    if(bPosition.y < -1500.0f + bRadius && bDirection.y < 0.0f) bDirection.y = -bDirection.y;
-    if(bPosition.y < 1500.0f - bRadius && bDirection.y > 0.0f) bDirection.y = -bDirection.y;
-    if(bPosition.z < -1500.0f + bRadius && bDirection.z < 0.0f) bDirection.z = -bDirection.z;
-    if(bPosition.z < 1500.0f - bRadius && bDirection.z > 0.0f) bDirection.z = -bDirection.z;
-    if(bPosition.x < -1500.0f + bRadius && bDirection.x < 0.0f) bDirection.x = -bDirection.x;
-    if(bPosition.x < 1500.0f - bRadius && bDirection.x > 0.0f) bDirection.x = -bDirection.x;
-    */
     if(bPosition.y <= -1500.0f + sunRadius || bPosition.y >= 1500.0f - sunRadius) sunDirection.y = -sunDirection.y;
     if(bPosition.x <= -1500.0f + sunRadius || bPosition.x >= 1500.0f - sunRadius) sunDirection.x = -sunDirection.x;
     if(bPosition.z <= -1500.0f + sunRadius || bPosition.z >= 1500.0f - sunRadius) sunDirection.z = -sunDirection.z;
-
+    */
 
     sunNode->translate(sunSpeed * evt.timeSinceLastFrame * sunDirection);
 }
