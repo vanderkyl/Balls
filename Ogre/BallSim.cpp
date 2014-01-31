@@ -1,5 +1,24 @@
 #include "BallSim.h"
  
+Sphere::Sphere(Ogre::SceneManager* scnMgr, Ogre::Vector3& dir, Ogre::Real& scale, Ogre::Real& radius, Ogre::Real& speed)
+{
+    if(radius > 100.0f) {
+        sEnt = scnMgr->createEntity("Star", "sphere.mesh");
+        sEnt->setMaterialName("Examples/Sun");
+    }
+    else { 
+        sEnt = scnMgr->createEntity("Planet", "sphere.mesh");
+        sEnt->setMaterialName("Examples/Earth");
+    }
+    sEnt->setCastShadows(true);
+    sNode = scnMgr->getRootSceneNode()->createChildSceneNode();
+    sNode->attachObject(sEnt);
+    sNode->scale(scale, scale, scale);
+    sDirection = dir;
+    sDirection.normalise();
+    sRadius = radius;
+    sSpeed = speed;
+}
 //-------------------------------------------------------------------------------------
 BallSim::BallSim(void)
     : sunNode(0),
@@ -18,9 +37,6 @@ BallSim::BallSim(void)
     mMouse(0),
     mKeyboard(0)
 {
-    sunDirection = Ogre::Vector3(1.0f, 2.0f, 3.0f);
-    sunRadius = 200.0f;
-    sunSpeed = 200.0f;
 }
 //-------------------------------------------------------------------------------------
 BallSim::~BallSim(void)
@@ -34,23 +50,31 @@ BallSim::~BallSim(void)
     delete mRoot;
 }
 
-void BallSim::move(const Ogre::FrameEvent& evt) {    
-    Ogre::Vector3 bPosition = sunNode->getPosition();
+void Sphere::move(const Ogre::FrameEvent& evt) {  
+     
+    Ogre::Vector3 bPosition = sNode->getPosition();
     std::cout << bPosition.y << std::endl;
-    
-    if(bPosition.y < -1500.0f + sunRadius && sunDirection.y < 0.0f) sunDirection.y = -sunDirection.y;
-    if(bPosition.y > 1500.0f - sunRadius && sunDirection.y > 0.0f) sunDirection.y = -sunDirection.y;
-    if(bPosition.z < -1500.0f + sunRadius && sunDirection.z < 0.0f) sunDirection.z = -sunDirection.z;
-    if(bPosition.z > 1500.0f - sunRadius && sunDirection.z > 0.0f) sunDirection.z = -sunDirection.z;
-    if(bPosition.x < -1500.0f + sunRadius && sunDirection.x < 0.0f) sunDirection.x = -sunDirection.x;
-    if(bPosition.x > 1500.0f - sunRadius && sunDirection.x > 0.0f) sunDirection.x = -sunDirection.x;
-    /*
-    if(bPosition.y <= -1500.0f + sunRadius || bPosition.y >= 1500.0f - sunRadius) sunDirection.y = -sunDirection.y;
-    if(bPosition.x <= -1500.0f + sunRadius || bPosition.x >= 1500.0f - sunRadius) sunDirection.x = -sunDirection.x;
-    if(bPosition.z <= -1500.0f + sunRadius || bPosition.z >= 1500.0f - sunRadius) sunDirection.z = -sunDirection.z;
-    */
+    if(bPosition.y < -1500.0f + sRadius && sDirection.y < 0.0f) { 
+        sDirection.y = -sDirection.y;
+    }
+    if(bPosition.y > 1500.0f - sRadius && sDirection.y > 0.0f) {
+        sDirection.y = -sDirection.y;
+    }
+    if(bPosition.z < -1500.0f + sRadius && sDirection.z < 0.0f) {
+        sDirection.z = -sDirection.z;
+    }
+    if(bPosition.z > 1500.0f - sRadius && sDirection.z > 0.0f) { 
+        sDirection.z = -sDirection.z;
+    }
+    if(bPosition.x < -1500.0f + sRadius && sDirection.x < 0.0f)  {
+        sDirection.x = -sDirection.x;
+    }
+    if(bPosition.x > 1500.0f - sRadius && sDirection.x > 0.0f) {
+        sDirection.x = -sDirection.x;
+    }
 
-    sunNode->translate(sunSpeed * evt.timeSinceLastFrame * sunDirection);
+    sNode->translate(sSpeed * evt.timeSinceLastFrame * sDirection);
+
 }
 
 void BallSim::createBox(void)
@@ -181,13 +205,28 @@ bool BallSim::go(void)
 //-------------------------------------------------------------------------------------
     // Create the scene
     createBox();
+
+    Ogre::Vector3 direction = Ogre::Vector3(1.0f, 2.0f, -2.0f);
+    Ogre::Real scale = 3.0f;
+    Ogre::Real radius = 300.0f;
+    Ogre::Real speed = 200.0f;
+    Sphere* s = new Sphere(mSceneMgr, direction, scale, radius, speed);
+    spheres.push_back(s);
+
+    direction = Ogre::Vector3(-1.0f, -2.0f, -2.0f);
+    scale = 1.0f;
+    radius = 100.0f;
+    speed = 600.0f;
+    Sphere* s2 = new Sphere(mSceneMgr, direction, scale, radius, speed);
+    spheres.push_back(s2);
+    /*
     Ogre::Entity* sun = mSceneMgr->createEntity("Star", "sphere.mesh");
     sun->setMaterialName("Examples/Sun");
     sunNode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
     
     sunNode->attachObject(sun);
     sunNode->scale(2.0f, 2.0f, 2.0f);
-    
+    */
     // Set ambient light
     mSceneMgr->setAmbientLight(Ogre::ColourValue(0.5, 0.5, 0.5));
  
@@ -267,7 +306,10 @@ bool BallSim::frameRenderingQueued(const Ogre::FrameEvent& evt)
     if (!mTrayMgr->isDialogVisible())
     {
         mCameraMan->frameRenderingQueued(evt);   // if dialog isn't up, then update the camera
-        move(evt);
+        for(int i = 0; i < spheres.size(); ++i) {
+            spheres[i]->move(evt);
+        }
+
         if (mDetailsPanel->isVisible())   // if details panel is visible, then update its contents
         {
             mDetailsPanel->setParamValue(0, Ogre::StringConverter::toString(mCamera->getDerivedPosition().x));

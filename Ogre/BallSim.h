@@ -17,21 +17,23 @@
  
 #include <SdkTrays.h>
 #include <SdkCameraMan.h>
+#include "Sphere.h"
 
 class BallSim : public Ogre::FrameListener, public Ogre::WindowEventListener, public OIS::KeyListener, public OIS::MouseListener, OgreBites::SdkTrayListener
 {
 public:
     BallSim(void);
     virtual ~BallSim(void);
-    void move(const Ogre::FrameEvent& evt);
     bool go(void);
     void createBox(void);
 protected:
+    std::vector<Sphere*> spheres;
     Ogre::SceneNode* sunNode;
     Ogre::Vector3 sunDirection;
     Ogre::Real sunRadius;
     Ogre::Real sunSpeed;
 
+    
     Ogre::Root *mRoot;
     Ogre::Camera* mCamera;
     Ogre::SceneManager* mSceneMgr;
